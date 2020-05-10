@@ -1,0 +1,157 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*<html>
+    <head>
+
+        <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+            <script src="http://cdn.kendostatic.com/2014.2.903/js/kendo.all.min.js"></script>
+        <link href="~/Content/CSS/RoomCustom.css" rel="stylesheet" />
+        <script src="/scripts/config.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.1/require.js"></script>
+        <link href="//cdn.kendostatic.com/2013.1.319/styles/kendo.common.min.css" rel="stylesheet" />
+        <link href="//cdn.kendostatic.com/2013.1.319/styles/kendo.default.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.2.621/styles/kendo.common-bootstrap.min.css" />
+        <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.2.621/styles/kendo.bootstrap.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    </head>*@
+@*<body>*@
+<div id="addEditWindow" class="pop-up-window"></div>
+<form id="gatepass">
+    <div class="gatepass-list">
+        <div class="grid-16">
+            <div id="grid"
+                 data-role="grid"
+                 data-toolbar="[{ 'template': $('\#grid-toolbar-template').html()}]"
+                 data-selectable="multiple"
+                 grid-height="450px"
+                 data-reorderable="true"
+                 @*data-pageable="{ numeric: true, buttonCount: 3, pageSize: 5, previousNext: true, info: true }"*@
+                 data-no-records="{template: '<h3>No Data Available.</h3>'}"
+                 data-bind="source: roomDataSource"
+                 data-auto-bind="true"
+                 data-columns='[
+                 {"field": "Id" , "hidden" : "true" },
+                 {"field":"Name", "title" : "Name"}
+                ]'>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script id="grid-toolbar-template" type="text/x-kendo-template">
+    <input type="button" class="k-button" id="btn-Add" value="Add New Room Members" onclick="viewModel.onAddEditClick(this)" />
+</script>
+
+<script id="addorEdit-template" type="text/x-kendo-template">
+    <div id="gatePass-entry">
+        <div class="col-row padding15">
+            <div class="col-3">
+                <label class="class-label required">Name :</label>
+                <input type="text" class="k-textbox input55" id="txtName" data-bind="value: name" placeholder="Name" />
+            </div>
+            <div class="col-3">
+                <label class="class-label required">Email # :</label>
+                <input type="text" tabindex="1" class="k-textbox input55" id="txtEmail" data-bind="value: email" placeholder="Email" />
+            </div>
+            <div class="col-3">
+                <label class="class-label">Reference Of :</label>
+                <select id="multiSelect" class="auto-complete-customer"> </select>
+                @*<select data-role="dropdownlist"
+                    data-text-field="Name"
+                    data-value-field="Id"
+                    id="ddlReference"
+                    data-bind="value: reference,source: referenceDataSource"></select>*@
+            </div>
+        </div>
+    </div>
+    <div class="form-footer">
+        <input type="button" class="save" value="Save" id="btnSaveGatePass" onclick="viewModel.onSaveClick(this)" />
+        <input type="button" class="cancel" value="Clear" id="btnClearGatePass" onclick="viewModel.onClearClick(this)" />
+    </div>
+</script>
+
+<script type="text/javascript">
+    var viewModel;
+    require([
+        'RoomVm',
+        'kendo.all.min'
+    ],
+        function (tmpWV, kendo) {
+            $(function () {
+                'use strict';
+
+                viewModel = kendo.observable({
+                    name: '',
+                    email: '',
+
+
+                    roomDataSource: new kendo.data.DataSource({
+                        data: [
+                            { Name: "Loaded In" },
+                            { Name: "Empty In" },
+                            { Name: "Truck In" },
+                        ]
+                    }),
+
+                    referenceDataSource: new kendo.data.DataSource({
+                        data: [
+                             Name: "Bulli Babu", Id: 1 },
+                            { Name: "Mahesh Babu", Id: 2 },
+                            { Name: "Subhani Basha", Id: 3 },
+                            { Name: "Seshu Babu", Id: 4 },
+                            { Name: "Yesu Babu", Id: 5 },
+                            { Name: "Pavan", Id: 6 },
+                            { Name: "Somu", Id: 7 },
+                        ]
+                    }),
+
+                    initialize: function () {
+                        debugger
+                        var pushMenu = $("a[data-toggle='push-menu']");
+
+                        if (pushMenu && pushMenu.first())
+                            pushMenu.first().click();
+                    },
+
+                    onAddEditClick: function () {
+                        var kendoWindow = $('#addEditWindow').kendoWindow({
+                            title: 'New Member',
+                            resizable: true,
+                            scrollable: false,
+                            modal: true,
+                            width: '80%'
+                        });
+                        kendoWindow.data("kendoWindow")
+                            .content($('#addorEdit-template').html())
+                            .center().open();
+
+                        viewModel.set('statusIds', []);
+                        RoomVm.setUpMultiSelect($('#multiSelect'), '#=data.Id#', RoomVm.schedulerStatusTypeDataSource, 'statusIds', 'Types', 'isAllItemsSelected');
+
+                        viewModel.addOrEditKendoWindow = kendoWindow;
+                        kendo.bind($('#addEditWindow'), viewModel);
+                    },
+
+                    onSaveClick: function () {
+                        RoomVm.notifyWarning("Yet to be developed");
+                    },
+
+                    onClearClick: function () {
+                        RoomVm.notifyWarning("Yet to be developed");
+                        
+                    },
+
+                });
+
+                viewModel.initialize();
+                kendo.bind($('#gatepass'), viewModel);
+            });
+        });
+</script>
+@*</body>
+    </html>*@
+

@@ -1,0 +1,204 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.title = "Investments";
+}
+<div id="addEditWindow" class="pop-up-window"></div>
+<form id="gatepass">
+    <div class="gatepass-list">
+        <div class="grid-16">
+            <div id="grid"
+                 data-role="grid"
+                 data-toolbar="[{ 'template': $('\#grid-toolbar-template').html()}]"
+                 grid-height="450px"
+                 data-reorderable="true"
+                 data-pageable="{ numeric: true, buttonCount: 3, pageSize: 2, previousNext: true }"
+                 data-no-records="{template: '<h3>No Data Available.</h3>'}"
+                 data-bind="source: gridDataSource"
+                 data-columns='[
+                 {"field": "Id" , "hidden" : "true" },
+                 {"field":"Name", "title" : "Name", "width": "100px"},
+                 {"field":"Investment", "title" : "Investment Purpose", "width": "100px"},
+                 {"field":"Amount", "title" : "Amount", "width": "100px"},
+                ]'>
+            </div>
+        </div>
+    </div>
+</form>
+
+<style>
+    .k-header {
+        background-color: #2398de;
+    }
+</style>
+
+<script id="grid-toolbar-template" type="text/x-kendo-template">
+    <input type="button" class="k-button" id="btn-Add" value="Add Investments" onclick="viewModel.onAddEditClick(this)" />
+</script>
+
+<script id="addorEdit-template" type="text/x-kendo-template">
+    <div id="gatePass-entry">
+        <div class="col-row padding15">
+            <div class="col-3">
+                <label class="class-label required">Name :</label>
+                <input type="text" class="k-textbox input55" id="nameDataSource">
+            </div>
+            <div class="col-3">
+                <label class="class-label required">Investment Purpose :</label>
+                <input type="text" class="k-textbox input55" id="txtPurposeInvestment" data-bind="value: purposeInvestment" placeholder="Investment Purpose" />
+            </div>
+            <div class="col-3">
+                <label class="class-label"> Date :</label>
+                <input class="input55" id="currentDate" data-bind="value: date" />
+            </div>
+        </div>
+        <div class="col-row padding15">
+            <div class="col-3">
+                <label class="class-label">Amount :</label>
+                <input type="text" class="pallet-in-txtbox numeric-text-customer-entry popup-numeric-txtbox" id="investerAmount" data-bind="value: investerAmount" />
+            </div>
+        </div>
+    </div>
+    <div class="form-footer">
+        <input type="button" class="save" value="Save" id="btnSaveGatePass" onclick="viewModel.onSaveClick(this)" />
+        <input type="button" class="cancel" value="Clear" id="btnClearGatePass" onclick="viewModel.onClearClick(this)" />
+    </div>
+</script>
+
+<script type="text/javascript">
+    var viewModel;
+    require([
+        'RoomVm',
+        'kendo.all.min'
+    ],
+        function (tmpWV, kendo) {
+            $(function () {
+                'use strict';
+
+                viewModel = kendo.observable({
+                    name: '',
+                    email: '',
+                    selectedName: 1,
+                    purposeInvestment: '',
+                    investerAmount: 0,
+                    date: kendo.toString(kendo.parseDate(new Date()), 'MMM/dd/yyyy'),
+
+
+                    gridDataSource: new kendo.data.DataSource({
+                        data: [
+                            { Name: "Bulli Babu", Investment: "Water can", "Amount": "35" },
+                            { Name: "Yesu Babu", Investment: "Water can", "Amount": "35" },
+                        ]
+                    }),
+
+                    investerDataSource: new kendo.data.DataSource({
+                        data: [
+                            { text: "Select Name", value: "0" },
+                            { text: "Bulli Babu", value: "1" },
+                            { text: "Mahesh Babu", value: "2" },
+                            { text: "Subhani Basha", value: "3" },
+                            { text: "Seshu Babu", value: "4" },
+                            { text: "Yesu Babu", value: "5" },
+                            { text: "Pavan", value: "6" },
+                            { text: "Somu", value: "7" },
+
+                        ]
+                    }),
+
+                    initialize: function () {
+                        debugger
+                        var pushMenu = $("a[data-toggle='push-menu']");
+
+                        if (pushMenu && pushMenu.first())
+                            pushMenu.first().click();
+
+
+                    },
+
+                    onAddEditClick: function () {
+                        var kendoWindow = $('#addEditWindow').kendoWindow({
+                            title: 'Investment',
+                            resizable: true,
+                            scrollable: false,
+                            modal: true,
+                            width: '80%'
+                        });
+                        kendoWindow.data("kendoWindow")
+                            .content($('#addorEdit-template').html())
+                            .center().open();
+
+                        viewModel.addOrEditKendoWindow = kendoWindow;
+                        kendo.bind($('#addEditWindow'), viewModel);
+
+                        $("#investerAmount").kendoNumericTextBox({
+                            format: "{0:n}",
+                            decimals: 0,
+                            min: 0,
+                        });
+
+                        $('#nameDataSource').kendoDropDownList({
+                            dataTextField: "text",
+                            dataValueField: "value",
+                            dataSource: viewModel.investerDataSource
+                        });
+
+                        $("#currentDate").kendoDatePicker({
+                            format: 'MMM/dd/yyyy',
+                            dateInput: true,
+                            value: new Date(),
+                            animation: false
+                        });
+                    },
+
+                    onSaveClick: function () {
+                        debugger
+                        var errorMessages = "";
+                        if ($('#nameDataSource').data('kendoDropDownList').value() === "0")
+                            errorMessages = "<span>Please select invester name</span>";
+                        if (viewModel.get('purposeInvestment') == "")
+                            errorMessages += "<span>Please enter investment purpose</span>";
+                        if (viewModel.get('date') === null)
+                            errorMessages += "<span>Please select proper investment date</span>";
+                        if (viewModel.get('investerAmount') === 0)
+                            errorMessages += "<span>Please select investment amount greater than zero</span>";
+
+                        if (errorMessages)
+                            RoomVm.notifyWarning(errorMessages);
+                        else
+                            RoomVm.notifySuccess('success');
+
+
+                        var investmentViewModel = {
+                            Id: 1,
+                            Name: "seshu",
+                            InvestmentPurpose: "Waterbottle",
+                            Amount: 25,
+                            Date: $("#currentDate").val()
+
+                        };
+
+                        $.ajax({
+                            url: "/Master/SaveInvestments",
+                            dataType: "JSON",
+                            data: investmentViewModel,
+                            type: "POST",
+                            success: function (response) {
+                                debugger
+                            },
+                            error: function (response) {
+                                debugger
+                               
+                            }
+                        });
+                    },
+
+                    onClearClick: function () {
+                        RoomVm.notifyWarning("Yet to be developed");
+
+                    },
+                });
+
+                viewModel.initialize();
+                kendo.bind($('#gatepass'), viewModel);
+            });
+        });
+</script>
