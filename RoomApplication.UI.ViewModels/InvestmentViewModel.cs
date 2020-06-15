@@ -13,7 +13,6 @@ namespace RoomApplication.UI.ViewModels
         public string InvestmentPurpose { get; set; }
         public double Amount { get; set; }
         public DateTime Date { get; set; }
-        public string testc {get;set;}
 
         public dynamic investment()
         {
