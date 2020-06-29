@@ -15,6 +15,7 @@ namespace RoomApplication.UI.ViewModels
         public DateTime Date { get; set; }
         public string Testing { get; set; }
         public string Testing1 { get; set; }
+        public string Test{get;set;}
 
         public dynamic investment()
         {
