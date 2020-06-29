@@ -16,7 +16,7 @@ namespace RoomApplication.UI.ViewModels
         public string Testing { get; set; }
         public string Testing1 { get; set; }
         public string Test{get;set;}
-
+        public string Test1 { get; set; }
         public dynamic investment()
         {
             return new
